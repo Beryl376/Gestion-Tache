@@ -1,15 +1,16 @@
 <?php
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreTacheRequest;
 use App\Models\Tache;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class TacheController extends Controller
 {
     public function index()
     {
-        return Tache::all();
+        return Tache::paginate(10);
     }
 
     // public function store(Request $request)
@@ -30,22 +31,12 @@ class TacheController extends Controller
     //     return response()->json($post, 201);
     // }
 
-    public function store(Request $request)
+    public function store(StoreTacheRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'descriptions' => 'nullable|string',
-            'completed' => 'boolean',
-        ]);
+       
+        $Tache = Tache::create($request->validated());
 
-        $Tache = Tache::create([
-            'title' => $request->title,
-            'descriptions' => $request->descriptions,
-            'completed' => $request->completed ?? false,
-            'user_id' => Auth::id(),
-        ]);
-
-        return response()->json($Tache, 201);
+        return response()->json($Tache, Response::HTTP_CREATED);
     }
 
     public function show(Tache $Tache)
