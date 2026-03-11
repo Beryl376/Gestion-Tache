@@ -12,22 +12,40 @@ class TacheController extends Controller
         return Tache::all();
     }
 
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'title' => 'required|string|max:255',
+    //         'description' => 'nullable|string',
+    //         'completed' => 'default: false',
+    //     ]);
+    //     $post = new Tache();
+    //     $post->title = $request->title;
+    //     $post->description = $request->description;
+    //     $post->completed = $request->completed;
+    //     $post->user_id = Auth::id();
+    //     $post->save();
+    //     // $Tache = Tache::create($request->all());
+
+    //     return response()->json($post, 201);
+    // }
+
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'completed' => 'default: false',
+            'descriptions' => 'nullable|string',
+            'completed' => 'boolean',
         ]);
-        $post = new Tache();
-        $post->title = $request->title;
-        $post->description = $request->description;
-        $post->completed = $request->completed;
-        $post->user_id = Auth::id();
-        $post->save();
-        // $Tache = Tache::create($request->all());
 
-        return response()->json($post, 201);
+        $Tache = Tache::create([
+            'title' => $request->title,
+            'descriptions' => $request->descriptions,
+            'completed' => $request->completed ?? false,
+            'user_id' => Auth::id(),
+        ]);
+
+        return response()->json($Tache, 201);
     }
 
     public function show(Tache $Tache)
