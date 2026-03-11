@@ -61,6 +61,9 @@ class TacheController extends Controller
     {
         $Tache->delete();
 
-        return response()->json(null, 204);
+       return response()->json([
+            'status' => 'success',
+            'message' => 'Tâche supprimée avec succès',
+        ], Response::HTTP_OK);
     }
 }

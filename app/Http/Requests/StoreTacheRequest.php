@@ -25,7 +25,7 @@ class StoreTacheRequest extends FormRequest
             'title' => 'required|string|max:255',
             'descriptions' => 'nullable|string',
             'completed' => 'boolean',
-            'user_id' => 'exists:users,id',
+            'user_id' => 'nullable|exists:users,id',
         ];
     }
 }
