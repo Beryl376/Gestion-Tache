@@ -3,33 +3,27 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreTacheRequest;
 use App\Models\Tache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class TacheController extends Controller
 {
     /**
-     * Lister les tâches de l'utilisateur connecté uniquement.
+     * Lister les tâches de l'utilisateur connecté uniquement (paginé).
      */
     public function index()
     {
-        $taches = Tache::where('user_id', Auth::id())->get();
-
-        return response()->json($taches);
+        return Tache::where('user_id', Auth::id())->paginate(10);
     }
 
     /**
      * Créer une nouvelle tâche pour l'utilisateur connecté.
      */
-    public function store(Request $request)
+    public function store(StoreTacheRequest $request)
     {
-        $request->validate([
-            'title'        => 'required|string|max:255',
-            'descriptions' => 'nullable|string',
-            'completed'    => 'boolean',
-        ]);
-
         $tache = Tache::create([
             'title'        => $request->title,
             'descriptions' => $request->descriptions,
@@ -37,7 +31,7 @@ class TacheController extends Controller
             'user_id'      => Auth::id(),
         ]);
 
-        return response()->json($tache, 201);
+        return response()->json($tache, Response::HTTP_CREATED);
     }
 
     /**
@@ -67,14 +61,13 @@ class TacheController extends Controller
             'completed'    => 'boolean',
         ]);
 
-        // N'autoriser que les champs validés (évite l'injection de user_id, etc.)
         $tache->update($validated);
 
         return response()->json($tache);
     }
 
     /**
-     * Supprimer une tâche (vérification de propriété). Convention Laravel: destroy.
+     * Supprimer une tâche (vérification de propriété).
      */
     public function destroy(Tache $tache)
     {
@@ -84,6 +77,9 @@ class TacheController extends Controller
 
         $tache->delete();
 
-        return response()->json(null, 204);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Tâche supprimée avec succès',
+        ], Response::HTTP_OK);
     }
 }

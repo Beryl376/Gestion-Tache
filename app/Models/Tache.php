@@ -12,11 +12,10 @@ class Tache extends Model
         'title',
         'descriptions',
         'completed',
-        'user_id'
     ];
     public function user()
         {
             return $this->belongsTo(User::class, 'user_id');
-        }   
+        }
 
 }
