@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
 use App\Models\Tache;
 use Illuminate\Http\Request;
@@ -7,68 +9,80 @@ use Illuminate\Support\Facades\Auth;
 
 class TacheController extends Controller
 {
+    /**
+     * Lister les tâches de l'utilisateur connecté uniquement.
+     */
     public function index()
     {
-        return Tache::all();
+        $taches = Tache::where('user_id', Auth::id())->get();
+
+        return response()->json($taches);
     }
 
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'title' => 'required|string|max:255',
-    //         'description' => 'nullable|string',
-    //         'completed' => 'default: false',
-    //     ]);
-    //     $post = new Tache();
-    //     $post->title = $request->title;
-    //     $post->description = $request->description;
-    //     $post->completed = $request->completed;
-    //     $post->user_id = Auth::id();
-    //     $post->save();
-    //     // $Tache = Tache::create($request->all());
-
-    //     return response()->json($post, 201);
-    // }
-
+    /**
+     * Créer une nouvelle tâche pour l'utilisateur connecté.
+     */
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
+            'title'        => 'required|string|max:255',
             'descriptions' => 'nullable|string',
-            'completed' => 'boolean',
+            'completed'    => 'boolean',
         ]);
 
-        $Tache = Tache::create([
-            'title' => $request->title,
+        $tache = Tache::create([
+            'title'        => $request->title,
             'descriptions' => $request->descriptions,
-            'completed' => $request->completed ?? false,
-            'user_id' => Auth::id(),
+            'completed'    => $request->boolean('completed', false),
+            'user_id'      => Auth::id(),
         ]);
 
-        return response()->json($Tache, 201);
+        return response()->json($tache, 201);
     }
 
-    public function show(Tache $Tache)
+    /**
+     * Afficher une tâche spécifique (vérification de propriété).
+     */
+    public function show(Tache $tache)
     {
-        return $Tache;
+        if ($tache->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Accès non autorisé.'], 403);
+        }
+
+        return response()->json($tache);
     }
 
-    public function update(Request $request, Tache $Tache)
+    /**
+     * Mettre à jour une tâche (vérification de propriété).
+     */
+    public function update(Request $request, Tache $tache)
     {
-        $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string',
-            'completed' => 'boolean',
+        if ($tache->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Accès non autorisé.'], 403);
+        }
+
+        $validated = $request->validate([
+            'title'        => 'sometimes|required|string|max:255',
+            'descriptions' => 'nullable|string',
+            'completed'    => 'boolean',
         ]);
 
-        $Tache->update($request->all());
+        // N'autoriser que les champs validés (évite l'injection de user_id, etc.)
+        $tache->update($validated);
 
-        return response()->json($Tache);
+        return response()->json($tache);
     }
 
-    public function delete(Request $request, Tache $Tache)
+    /**
+     * Supprimer une tâche (vérification de propriété). Convention Laravel: destroy.
+     */
+    public function destroy(Tache $tache)
     {
-        $Tache->delete();
+        if ($tache->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Accès non autorisé.'], 403);
+        }
+
+        $tache->delete();
 
         return response()->json(null, 204);
     }

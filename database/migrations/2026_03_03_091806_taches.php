@@ -14,12 +14,11 @@ return new class extends Migration
         Schema::create('taches', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('descriptions');
+            $table->text('descriptions')->nullable();
             $table->boolean('completed')->default(false);
-            $table->foreignId('user_id')->constrained('id')->on('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
-
     }
 
     /**
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('taches');
     }
 };
