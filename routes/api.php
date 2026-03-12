@@ -24,6 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Authentification
     Route::post('/logout',  [UserController::class, 'logout']);
     Route::get('/profile',  [UserController::class, 'profile']);
+    Route::post('/report/generate', [\App\Http\Controllers\Api\ReportController::class, 'generate']);
 
     // CRUD Tâches (RESTful)
     Route::get('/taches',           [TacheController::class, 'index']);
