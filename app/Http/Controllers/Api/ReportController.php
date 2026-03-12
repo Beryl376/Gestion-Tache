@@ -69,14 +69,14 @@ class ReportController extends Controller
 
         if (!$apiKey || $apiKey === 'your-api-key') {
             return "### 1. SYNTHÈSE EXÉCUTIVE\n" .
-                   "L'analyse actuelle indique que vous gérez un total de " . Auth::user()->taches->count() . " tâches. Le flux de travail semble constant mais nécessite une optimisation de la clôture des dossiers.\n\n" .
-                   "### 2. ANALYSE DES RISQUES ET BLOCAGES\n" .
-                   "- **Saturation cognitive** : Le nombre de tâches en cours peut freiner la réactivité.\n" .
-                   "- **Absence de priorisation claire** : Risque de dispersion sur des tâches à faible valeur ajoutée.\n\n" .
-                   "### 3. RECOMMANDATIONS STRATÉGIQUES\n" .
-                   "- **Application de la règle des 2 minutes** : Traitez immédiatement ce qui est rapide.\n" .
-                   "- **Revue hebdomadaire** : Purgez les tâches obsolètes pour clarifier la vision stratégique.\n\n" .
-                   "*Note : Pour une analyse réelle par Llama 3, veuillez configurer GROQ_API_KEY.*";
+                "L'analyse actuelle indique que vous gérez un total de " . Auth::user()->taches->count() . " tâches. Le flux de travail semble constant mais nécessite une optimisation de la clôture des dossiers.\n\n" .
+                "### 2. ANALYSE DES RISQUES ET BLOCAGES\n" .
+                "- **Saturation cognitive** : Le nombre de tâches en cours peut freiner la réactivité.\n" .
+                "- **Absence de priorisation claire** : Risque de dispersion sur des tâches à faible valeur ajoutée.\n\n" .
+                "### 3. RECOMMANDATIONS STRATÉGIQUES\n" .
+                "- **Application de la règle des 2 minutes** : Traitez immédiatement ce qui est rapide.\n" .
+                "- **Revue hebdomadaire** : Purgez les tâches obsolètes pour clarifier la vision stratégique.\n\n" .
+                "**";
         }
 
         try {
@@ -95,7 +95,8 @@ class ReportController extends Controller
             if ($response->successful()) {
                 return $response->json()['choices'][0]['message']['content'];
             }
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return "Erreur lors de la communication avec l'IA. " . $e->getMessage();
         }
 
