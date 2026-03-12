@@ -10,7 +10,8 @@
         .header p { color: #64748b; margin: 5px 0 0 0; font-size: 14px; }
         .section { margin-bottom: 30px; }
         .section-title { font-size: 18px; font-weight: bold; color: #334155; margin-bottom: 15px; border-left: 4px solid #2563eb; padding-left: 10px; }
-        .ai-analysis { background-color: #f8fafc; border-radius: 8px; padding: 20px; font-style: italic; line-height: 1.6; }
+        .ai-analysis { background-color: #f8fafc; border-radius: 8px; padding: 20px; font-style: normal; line-height: 1.6; }
+        .ai-analysis h3 { margin-top: 0; color: #2563eb; font-size: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
         .task-list { width: 100%; border-collapse: collapse; }
         .task-list th { text-align: left; background-color: #f1f5f9; padding: 10px; font-size: 12px; color: #475569; }
         .task-list td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
@@ -27,9 +28,9 @@
     </div>
 
     <div class="section">
-        <div class="section-title">Analyse Intelligente (Llama 3)</div>
+        <div class="section-title">Analyse Stratégique</div>
         <div class="ai-analysis">
-            {!! nl2br(e($analysis)) !!}
+            {!! $analysis !!}
         </div>
     </div>
 

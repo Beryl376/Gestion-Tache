@@ -20,28 +20,47 @@ class ReportController extends Controller
             return response()->json(['message' => 'Aucune tâche trouvée pour générer un rapport.'], 400);
         }
 
+        $totalTasks = $tasks->count();
+        $completedTasks = $tasks->where('completed', true)->count();
+        $completionRate = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 2) : 0;
+
         // Préparation du prompt pour Llama 3
         $taskListString = $tasks->map(function ($t) {
             $status = $t->completed ? 'Terminée' : 'En cours';
             return "- {$t->title} ({$status}) : {$t->descriptions}";
         })->implode("\n");
 
-        $prompt = "En tant qu'assistant de productivité, analyse la liste de tâches suivante de l'utilisateur {$user->name}. 
-        Rédige un rapport synthétique, sobre et encourageant (environ 200 mots). 
-        Inclus : un résumé de l'activité, une analyse de la thématique dominante, et 3 conseils personnalisés pour améliorer sa productivité.
-        Utilise un ton professionnel. Voici les tâches :\n\n{$taskListString}";
+        $prompt = "En tant qu'analyste de performance executive, analyse le portefeuille de tâches suivant pour l'utilisateur {$user->name}. 
+        
+        DONNÉES CLÉS :
+        - Tâches totales : {$totalTasks}
+        - Complétées : {$completedTasks}
+        - Taux d'achèvement : {$completionRate}%
+
+        CONSIGNES DE RÉDACTION :
+        Rédige un rapport au format Markdown, professionnel et analytique, structuré exactement comme suit :
+        1. SYNTHÈSE EXÉCUTIVE (Vue d'ensemble de la situation actuelle)
+        2. ANALYSE DES RISQUES ET BLOCAGES (Identification des éléments qui freinent l'activité)
+        3. RECOMMANDATIONS STRATÉGIQUES (Actions suggérées à court et moyen terme)
+
+        Utilise un ton formel, executive et factuel. Voici le détail des tâches :\n\n{$taskListString}";
 
         // Appel à l'IA (Utilisation de Groq par défaut ou Mock si pas de clé)
         $analysis = $this->getAiAnalysis($prompt);
+
+        // Utilisation de Parsedown pour le rendu Markdown
+        $parsedown = new \Parsedown();
+        $analysisHtml = $parsedown->text($analysis);
 
         // Génération du PDF
         $pdf = Pdf::loadView('pdf.report', [
             'user' => $user,
             'tasks' => $tasks,
-            'analysis' => $analysis
+            'analysis' => $analysisHtml
         ]);
 
-        return $pdf->download("rapport_productivite_{$user->name}.pdf");
+        $timestamp = now()->format('Ymd_His');
+        return $pdf->download("rapport_executive_{$user->name}_{$timestamp}.pdf");
     }
 
     private function getAiAnalysis($prompt)
@@ -49,7 +68,15 @@ class ReportController extends Controller
         $apiKey = config('services.groq.key');
 
         if (!$apiKey || $apiKey === 'your-api-key') {
-            return "Note : L'API Llama 3 n'est pas encore configurée. Voici une analyse par défaut basée sur vos " . Auth::user()->taches->count() . " tâches. Vous semblez avoir un bon équilibre entre vos différentes activités. Continuez ainsi ! (Configurez GROQ_API_KEY dans votre .env pour une analyse réelle)";
+            return "### 1. SYNTHÈSE EXÉCUTIVE\n" .
+                   "L'analyse actuelle indique que vous gérez un total de " . Auth::user()->taches->count() . " tâches. Le flux de travail semble constant mais nécessite une optimisation de la clôture des dossiers.\n\n" .
+                   "### 2. ANALYSE DES RISQUES ET BLOCAGES\n" .
+                   "- **Saturation cognitive** : Le nombre de tâches en cours peut freiner la réactivité.\n" .
+                   "- **Absence de priorisation claire** : Risque de dispersion sur des tâches à faible valeur ajoutée.\n\n" .
+                   "### 3. RECOMMANDATIONS STRATÉGIQUES\n" .
+                   "- **Application de la règle des 2 minutes** : Traitez immédiatement ce qui est rapide.\n" .
+                   "- **Revue hebdomadaire** : Purgez les tâches obsolètes pour clarifier la vision stratégique.\n\n" .
+                   "*Note : Pour une analyse réelle par Llama 3, veuillez configurer GROQ_API_KEY.*";
         }
 
         try {
