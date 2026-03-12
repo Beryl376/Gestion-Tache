@@ -12,6 +12,7 @@ class Tache extends Model
         'title',
         'descriptions',
         'completed',
+        'user_id'
     ];
     public function user()
         {
